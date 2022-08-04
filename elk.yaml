@@ -1,0 +1,48 @@
+1  ---
+2
+3  - name:Elk Config
+4    host: elk
+5    become: true
+6    tasks:
+7    - name:docker.io (check-install)
+8      apt:
+9        update_cache: yes
+10       name: docker.io
+11       state: present
+12
+13   - name: python3-pip (check-install)
+14     apt:
+15       force_apt_get: yes
+16       name: python3-pip
+17       state: present
+18
+19   - name: docker (check-install)
+20     pip:
+21       name: docker
+22       state: present
+23
+24   - name: Increase Virtual Memory
+25     command: sysctl -w vm.max_map_count=262144
+26
+27   - name: Use more memory
+28     sysctl:
+29       name: vm.max_max_count
+30       value: '262144'
+31       state: present
+32       reload: yes
+33
+34   - name: elk container
+35     docker_container:
+36       name: elk
+37       image: sebp/elk:761
+38       state: started
+39       restart_policy: always
+40       published_ports:
+41         - 5601:5601
+42         - 9200:9200
+43         - 5044:5044
+44
+45   - name: Enable docker
+46     systemd:
+47       name: docker
+48       enabled: yes
